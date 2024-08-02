@@ -8,15 +8,24 @@ const getMovies = async () => {
 
     if (response.status === 200) {
       const dataMovies = await response.json();
+
+      let movies = "";
       dataMovies.results.forEach((movie) => {
-        console.log(movie.title);
+        movies += `
+            <div class="movie">
+                <img class="poster" 
+                src="https://image.tmdb.org/t/p/w500${movie.poster_path}" />
+            </div>
+            <h3 class="title">${movie.title}</h3>
+        `;
       });
+      document.getElementById("container").innerHTML = movies;
     } else if (response.status === 401) {
       console.log("Key Not Authorization");
     } else if (response.status === 404) {
-      console.log("Pelicula Inexistente...");
+      console.log("Movie Not Found...");
     } else {
-      console.log("Hubo un Error y No sabemos que paso!!");
+      console.log("Has Error Anything!!");
     }
   } catch (error) {
     console.log(error);
