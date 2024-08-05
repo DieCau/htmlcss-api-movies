@@ -1,20 +1,37 @@
 let page = 1;
-const btnPrevius = document.getElementById("btnPrevius");
-const btnNext = document.getElementById("btnNext");
+let movies = "";
+let lastMovie;
 
-btnNext.addEventListener("click", () => {
-  if (page < 1000) {
-    page += 1;
-    getMovies();
+let observer = new IntersectionObserver(
+  (input, observer) => {
+    input.forEach(input => {
+      if (input.isIntersecting) {
+        page++;
+        getMovies();
+      }
+    });
+  },
+  {
+    rootMargin: "0px 0px 200px 0px",
+    threshold: 1.0,
   }
-});
+);
+// const btnPrevius = document.getElementById("btnPrevius");
+// const btnNext = document.getElementById("btnNext");
 
-btnPrevius.addEventListener("click", () => {
-  if (page > 1) {
-    page -= 1;
-    getMovies();
-  }
-});
+// btnNext.addEventListener("click", () => {
+//   if (page < 1000) {
+//     page += 1;
+//     getMovies();
+//   }
+// });
+
+// btnPrevius.addEventListener("click", () => {
+//   if (page > 1) {
+//     page -= 1;
+//     getMovies();
+//   }
+// });
 
 const getMovies = async () => {
   const apiId = "4395bc843bd79c6c20bf0ef20213cf79";
@@ -27,17 +44,26 @@ const getMovies = async () => {
     if (response.status === 200) {
       const dataMovies = await response.json();
 
-      let movies = "";
       dataMovies.results.forEach((movie) => {
         movies += `
             <div class="movie">
                 <img class="poster" 
                 src="https://image.tmdb.org/t/p/w500${movie.poster_path}" />
+                <h3 class="title">${movie.title}</h3>
             </div>
-            <h3 class="title">${movie.title}</h3>
         `;
       });
       document.getElementById("container").innerHTML = movies;
+
+      if (page < 1000) {
+        if (lastMovie) {
+          observer.unobserve(lastMovie);
+        }
+        const moviesOnScreen = document.querySelectorAll(".container .movie");
+        lastMovie = moviesOnScreen[moviesOnScreen.length - 1];
+        observer.observe(lastMovie);
+      }
+    
     } else if (response.status === 401) {
       console.log("Key Not Authorization");
     } else if (response.status === 404) {
